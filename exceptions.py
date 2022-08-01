@@ -1,16 +1,10 @@
-class ErrorSend(Exception):
-    """Базовый класс для исключений, которые необходимо отправить."""
-
-    pass
-
-
-class NoSendMessage(ErrorSend):
+class NoSendMessage(Exception):
     """Сообщение не отправлено."""
 
     pass
 
 
-class NoGetApiAnswer(ErrorSend):
+class NoGetApiAnswer(Exception):
     """Ошибка в запросе к эндпоинту API-сервиса."""
 
     pass
@@ -22,7 +16,7 @@ class ResponseTypeError(TypeError):
     pass
 
 
-class ResponseKeyError(ErrorSend):
+class ResponseKeyError(Exception):
     """
     Ошибка в ответе от API-сервиса: отсутствует ключ "homeworks" или
     'current_date'.
@@ -31,7 +25,7 @@ class ResponseKeyError(ErrorSend):
     pass
 
 
-class HomeworksTypeError(ErrorSend):
+class HomeworksTypeError(Exception):
     """Ошибка в ответе от API-сервиса: тип данных "homeworks" не список."""
 
     pass

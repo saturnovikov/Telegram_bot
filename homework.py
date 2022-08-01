@@ -9,8 +9,7 @@ from dotenv import load_dotenv
 from telegram import Bot
 
 from exceptions import (HomeworksTypeError, NoGetApiAnswer, NoSendMessage,
-                        ResponseKeyError, ResponseTypeError,
-                        StatusKeyError)
+                        ResponseKeyError, ResponseTypeError, StatusKeyError)
 
 load_dotenv()
 
@@ -46,26 +45,12 @@ class text_settings:
     END = '\033[0m'
 
 
-def def_text_error(raisename):
-    """Функция для сообщений: Error."""
-    text_error = raisename.__doc__
-    logger.error(text_settings.RED + text_error + text_settings.END)
-    new_error = text_error
-    return new_error
-
-
-def def_text_info(raisename):
-    """Функция для сообщений: Info."""
-    text_info = raisename.__doc__
-    logger.info(text_info)
-
-
 def send_message(bot, message):
     """Отправка сообщения."""
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
-    except:
-        raise NoSendMessage
+    except Exception:
+        raise NoSendMessage('Сообщение не отправлено.')
     logger.info('Сообщение отправлено')
 
 
@@ -75,18 +60,23 @@ def get_api_answer(current_timestamp):
     params = {'from_date': timestamp}
     response = requests.get(ENDPOINT, headers=HEADERS, params=params)
     if response.status_code != HTTPStatus.OK:
-        raise NoGetApiAnswer
+        raise NoGetApiAnswer('Ошибка в запросе к эндпоинту API-сервиса.')
     return response.json()
 
 
 def check_response(response):
     """Проверка полученных данных."""
     if not isinstance(response, dict):
-        raise ResponseTypeError
+        raise ResponseTypeError(
+            "Ошибка в ответе от API-сервиса: тип данных не словарь.")
     elif not response.keys() >= {'homeworks', 'current_date'}:
-        raise ResponseKeyError
+        raise ResponseKeyError(
+            'Ошибка в ответе от API - сервиса: отсутствует ключ "homeworks" '
+            'или "current_date".')
     elif not isinstance(response.get('homeworks'), list):
-        raise HomeworksTypeError
+        raise HomeworksTypeError(
+            'Ошибка в ответе от API-сервиса: тип данных "homeworks" '
+            'не список.')
     return response.get('homeworks')
 
 
@@ -100,7 +90,7 @@ def parse_status(homework):
                 verdict = HOMEWORK_STATUSES[key]
                 break
     else:
-        raise StatusKeyError
+        raise StatusKeyError('Ошибка в получении статуса домашней работы.')
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
@@ -147,20 +137,11 @@ def main():
                 previous_homeworks = dict(current_homework)
                 send_message(bot, text)
             current_timestamp = int(response.get('current_date'))
-        except NoSendMessage:
-            new_error = def_text_error(NoSendMessage)
-        except NoGetApiAnswer:
-            new_error = def_text_error(NoGetApiAnswer)
-        except ResponseTypeError:
-            new_error = def_text_error(ResponseTypeError)
-        except ResponseKeyError:
-            new_error = def_text_error(ResponseKeyError)
-        except HomeworksTypeError:
-            new_error = def_text_error(HomeworksTypeError)
-        except StatusKeyError:
-            def_text_info(StatusKeyError)
+        except StatusKeyError as error:
+            logger.info(error)
         except Exception as error:
             new_error = error
+            logger.error(text_settings.RED + str(error) + text_settings.END)
         else:
             logger.info('При работе программы ошибок нет.')
         finally:
