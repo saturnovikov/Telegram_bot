@@ -1,6 +1,6 @@
 import logging
 import sys
-from homework import check_response, parse_status, check_tokens
+from homework import check_response, parse_status, check_tokens, send_message
 # from tests.test_bot import test_check_response_no_homework
 
 
@@ -15,12 +15,13 @@ formatter = logging.Formatter(
     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 
-check_tokens()
-# print(check_tokens())
-if check_tokens():
-    print(check_tokens())
-else:
-    print('NOT TRUE ', check_tokens())
+print(send_message())
+# check_tokens()
+# # print(check_tokens())
+# if check_tokens():
+#     print(check_tokens())
+# else:
+#     print('NOT TRUE ', check_tokens())
 
 
 # send_mes()
@@ -36,14 +37,14 @@ response={}
 # response = [1, 2, 3]
 
 
-try:
-    homeworks = check_response(response)
-    homework = homeworks[0]
-except Exception as error:
-    logger.error(error)
-else:
-    print(parse_status(homework))
-    print('Прога работает дальше')
+# try:
+#     homeworks = check_response(response)
+#     homework = homeworks[0]
+# except Exception as error:
+#     logger.error(error)
+# else:
+#     print(parse_status(homework))
+#     print('Прога работает дальше')
 
     # homeworks = check_response(response)
     # homework = homeworks[0]

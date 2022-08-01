@@ -150,3 +150,6 @@ static/
 posts/static/
 media/
 
+# файлы для проверки
+dem.py
+proverka.py
