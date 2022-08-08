@@ -1,3 +1,4 @@
+import enum
 import logging
 import os
 import sys
@@ -6,7 +7,7 @@ from http import HTTPStatus
 
 import requests
 from dotenv import load_dotenv
-from telegram import Bot
+from telegram import Bot, TelegramError
 
 from exceptions import (HomeworksTypeError, NoGetApiAnswer, NoSendMessage,
                         ResponseKeyError, ResponseTypeError, StatusKeyError)
@@ -37,7 +38,7 @@ formatter = logging.Formatter(
 handler.setFormatter(formatter)
 
 
-class text_settings:
+class TextSettings(enum.Enum):
     """Класс для настройки текстовых сообщений."""
 
     RED = '\033[91m'
@@ -49,9 +50,10 @@ def send_message(bot, message):
     """Отправка сообщения."""
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
-    except Exception:
+    except TelegramError:
         raise NoSendMessage('Сообщение не отправлено.')
-    logger.info('Сообщение отправлено')
+    else:
+        logger.info('Сообщение отправлено')
 
 
 def get_api_answer(current_timestamp):
@@ -84,13 +86,13 @@ def parse_status(homework):
     """Получение данных о домашней работе."""
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
-    if homework_status in HOMEWORK_STATUSES:
-        for key in HOMEWORK_STATUSES:
-            if homework_status == key:
-                verdict = HOMEWORK_STATUSES[key]
-                break
-    else:
-        raise StatusKeyError('Ошибка в получении статуса домашней работы.')
+    if not homework_name:
+        raise StatusKeyError('Ошибка: нет ключа "homework_name" в ответе. '
+                             'Возможно изменения в API')
+    elif homework_status not in HOMEWORK_STATUSES:
+        raise StatusKeyError('Ошибка: пришел незадокументированный статус.'
+                             'Возможно изменения в API')
+    verdict = HOMEWORK_STATUSES[homework_status]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
@@ -119,7 +121,7 @@ def main():
             message = ('Проблема с токеном для Telegram. '
                        'Программа остановлена')
         sys.exit(logger.critical(
-            text_settings.RED + message + text_settings.END))
+            TextSettings.RED.value + message + TextSettings.END.value))
     bot = Bot(token=TELEGRAM_TOKEN)
     while True:
         try:
@@ -141,7 +143,8 @@ def main():
             logger.info(error)
         except Exception as error:
             new_error = error
-            logger.error(text_settings.RED + str(error) + text_settings.END)
+            logger.error(
+                TextSettings.RED.value + str(error) + TextSettings.END.value)
         else:
             logger.info('При работе программы ошибок нет.')
         finally:

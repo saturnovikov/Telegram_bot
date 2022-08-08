@@ -1,4 +1,7 @@
-class NoSendMessage(Exception):
+from telegram import TelegramError
+
+
+class NoSendMessage(TelegramError):
     """Сообщение не отправлено."""
 
     pass
