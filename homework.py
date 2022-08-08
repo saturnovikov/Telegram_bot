@@ -86,10 +86,10 @@ def parse_status(homework):
     """Получение данных о домашней работе."""
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
-    if not homework_name:
+    if homework_name is None:
         raise StatusKeyError('Ошибка: нет ключа "homework_name" в ответе. '
                              'Возможно изменения в API')
-    elif homework_status not in HOMEWORK_STATUSES:
+    if homework_status not in HOMEWORK_STATUSES:
         raise StatusKeyError('Ошибка: пришел незадокументированный статус.'
                              'Возможно изменения в API')
     verdict = HOMEWORK_STATUSES[homework_status]
